@@ -106,7 +106,6 @@
 
         .modal {
             background-color: rgba(255, 255, 255, 0.98);
-            /* PERUBAHAN: Padding bawah dikurangi menjadi 15px */
             padding: 30px 30px 15px 30px; 
             border-radius: 20px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
@@ -124,7 +123,7 @@
 
         .overlay.active .modal { transform: scale(1); opacity: 1; }
 
-        /* Judul Modal (H2) - Disesuaikan margin-bottom */
+        /* Judul Modal (H2) */
         .modal h2 {
             color: #ff3860; font-family: 'Georgia', serif; 
             margin-bottom: 15px; 
@@ -135,7 +134,7 @@
         /* Area Teks Animasi */
         .animated-text {
             line-height: 1.7;
-            margin-bottom: 10px; /* PERUBAHAN: Mengurangi margin bawah dari 15px ke 10px */
+            margin-bottom: 10px; 
             font-size: 1.1em;
             text-align: left;
             padding: 10px;
@@ -160,7 +159,7 @@
         .photo-container {
             opacity: 0;
             transition: opacity 1s ease-in; 
-            margin-top: 10px; /* PERUBAHAN: Mengurangi margin atas dari 20px ke 10px */
+            margin-top: 10px; 
             flex-shrink: 0; 
             order: 3; 
         }
@@ -181,17 +180,17 @@
             font-size: 1em; 
             color: #000000; 
             font-weight: bold; 
-            margin-top: 8px; /* PERUBAHAN: Mengurangi margin atas dari 15px ke 8px (lebih rapat) */
+            margin-top: 8px; 
             flex-shrink: 0; 
             order: 4; 
-            line-height: 1.4; /* Sedikit mengurangi line-height */
+            line-height: 1.4; 
         }
 
         /* Gaya untuk teks "from bububb" */
         .modal .from-text {
             font-size: 0.9em; 
             color: #555555; 
-            margin-top: 3px; /* PERUBAHAN: Mengurangi margin atas dari 5px ke 3px (lebih rapat) */
+            margin-top: 3px; 
             flex-shrink: 0;
             order: 5; 
         }
@@ -207,7 +206,6 @@
         /* Responsif */
         @media (max-width: 500px) {
             .center-container { padding-top: 5vh; }
-            /* PERUBAHAN: Padding bawah di mobile juga dirapatkan */
             .modal { padding: 20px 20px 10px 20px; } 
             .animated-text { min-height: 80px; } 
         }
@@ -217,9 +215,9 @@
 <body>
     
     <audio id="surpriseMusic" loop preload="auto">
-    <source src="mp3/sempurnabaru.mp3" type="audio/mp3">
-    Browser Anda tidak mendukung elemen audio.
-</audio>
+        <source src="mp3/sempurnabaru.mp3" type="audio/mp3">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
 
     <div class="center-container">
         <h1>Ketuk Kadonya, Sayang!</h1>
@@ -270,27 +268,12 @@
         let isTyping = false;
         let musicPlayed = false;
 
+        // Fungsi stopMusic disederhanakan dan dipertahankan
         function stopMusic() {
             surpriseMusic.pause();
             surpriseMusic.currentTime = 0; 
             musicPlayed = false;
         }
-
-        function playMusic() {
-    if (!musicPlayed) {
-        surpriseMusic.currentTime = 0; // Pastikan mulai dari awal
-        surpriseMusic.muted = true; // Coba putar dalam keadaan mute dulu
-        surpriseMusic.play();
-
-        // Unmute setelah sebentar (memberi waktu browser untuk "mengizinkan" pemutaran)
-        setTimeout(() => {
-            surpriseMusic.muted = false;
-            musicPlayed = true;
-        }, 100); 
-
-        // Catatan: Jika ini masih gagal, ini adalah masalah pada file MP3.
-    }
-}
 
         function typeMessage() {
             if (isTyping) return;
@@ -322,16 +305,32 @@
                     clearInterval(typing);
                     isTyping = false;
                     lineIndex++;
-                    setTimeout(typeMessage, 1200); // Jeda antar baris: 1.2 detik (cocok untuk lagu lambat)
+                    setTimeout(typeMessage, 1200); // Jeda antar baris: 1.2 detik
                 }
-            }, 100); // Kecepatan ketik: 100ms per karakter (lebih lambat)
+            }, 100); // Kecepatan ketik: 100ms per karakter
         }
 
+        // LOGIKA PEMUTARAN AUDIO DISISIPKAN LANGSUNG DI SINI
         giftBox.addEventListener('click', () => {
             if (messageModal.classList.contains('active')) return; 
             
             giftBox.classList.add('opened');
-            playMusic(); 
+            
+            if (!musicPlayed) {
+                // Coba putar dengan Promise (metode paling handal)
+                surpriseMusic.play()
+                    .then(() => {
+                        // Berhasil diputar
+                        musicPlayed = true;
+                    })
+                    .catch(error => {
+                        // Gagal (DOMException Autoplay Policy) - coba putar tanpa penanganan Promise (fallback)
+                        console.error("Gagal memutar audio:", error);
+                        surpriseMusic.volume = 0.5; // Coba atur volume
+                        surpriseMusic.play();
+                        musicPlayed = true;
+                    });
+            }
             
             setTimeout(() => {
                 messageModal.classList.add('active');
@@ -361,6 +360,3 @@
     </script>
 </body>
 </html>
-
-
-
