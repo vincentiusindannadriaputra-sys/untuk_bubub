@@ -277,14 +277,20 @@
         }
 
         function playMusic() {
-            if (!musicPlayed) {
-                surpriseMusic.play().then(() => {
-                    musicPlayed = true;
-                }).catch(error => {
-                    console.log("Autoplay diblokir.");
-                });
-            }
-        }
+    if (!musicPlayed) {
+        surpriseMusic.currentTime = 0; // Pastikan mulai dari awal
+        surpriseMusic.muted = true; // Coba putar dalam keadaan mute dulu
+        surpriseMusic.play();
+
+        // Unmute setelah sebentar (memberi waktu browser untuk "mengizinkan" pemutaran)
+        setTimeout(() => {
+            surpriseMusic.muted = false;
+            musicPlayed = true;
+        }, 100); 
+
+        // Catatan: Jika ini masih gagal, ini adalah masalah pada file MP3.
+    }
+}
 
         function typeMessage() {
             if (isTyping) return;
@@ -355,4 +361,5 @@
     </script>
 </body>
 </html>
+
 
