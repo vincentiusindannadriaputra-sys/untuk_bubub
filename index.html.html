@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sebuah Kejutan untukmu, Sayang!</title>
+    <style>
+        /* Gaya CSS Dasar (Hampir tidak berubah) */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: #4a4a4a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .center-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; 
+            padding-top: 10vh; 
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: #d81b60;
+            font-family: 'Georgia', serif;
+            margin-bottom: 50px;
+            animation: fadeInText 2s ease-in-out;
+            font-size: 2em;
+        }
+
+        @keyframes fadeInText {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Gaya Kado (Tidak Berubah) */
+        .gift-box {
+            position: relative;
+            width: 200px;
+            height: 150px;
+            background-color: #e91e63;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
+        }
+
+        .gift-box::before, .gift-box::after { content: ''; position: absolute; background-color: #ffc107; }
+        .gift-box::before { width: 30px; height: 100%; left: 50%; transform: translateX(-50%); }
+        .gift-box::after { width: 100%; height: 30px; top: 50%; transform: translateY(-50%); }
+
+        .gift-lid {
+            position: absolute;
+            width: 220px;
+            height: 40px;
+            background-color: #d81b60;
+            border-radius: 10px;
+            top: -20px;
+            left: -10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            transition: transform 0.5s ease-out;
+            transform-origin: bottom center;
+        }
+
+        .gift-box.opened .gift-lid { transform: translateY(-100px) rotateX(45deg); }
+        
+        .gift-bow {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #ffeb3b;
+            border-radius: 50%;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 11;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Gaya Modal */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); display: flex;
+            justify-content: center; align-items: center; z-index: 100;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+        }
+
+        .overlay.active { opacity: 1; visibility: visible; }
+
+        .modal {
+            background-color: rgba(255, 255, 255, 0.98);
+            /* PERUBAHAN: Padding bawah dikurangi menjadi 15px */
+            padding: 30px 30px 15px 30px; 
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            max-height: 90vh; 
+            width: 90%;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+            position: relative;
+            
+            display: flex; 
+            flex-direction: column;
+        }
+
+        .overlay.active .modal { transform: scale(1); opacity: 1; }
+
+        /* Judul Modal (H2) - Disesuaikan margin-bottom */
+        .modal h2 {
+            color: #ff3860; font-family: 'Georgia', serif; 
+            margin-bottom: 15px; 
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0; 
+        }
+
+        /* Area Teks Animasi */
+        .animated-text {
+            line-height: 1.7;
+            margin-bottom: 10px; /* PERUBAHAN: Mengurangi margin bawah dari 15px ke 10px */
+            font-size: 1.1em;
+            text-align: left;
+            padding: 10px;
+            border-left: 5px solid #ff7b8c;
+            min-height: 100px; 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            word-wrap: break-word; 
+        }
+        
+        .message-line {
+            display: block; 
+            overflow: hidden;
+            letter-spacing: .05em;
+            background: linear-gradient(45deg, #ff6b6b, #ffc76b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+
+        /* Gaya Foto Bersama */
+        .photo-container {
+            opacity: 0;
+            transition: opacity 1s ease-in; 
+            margin-top: 10px; /* PERUBAHAN: Mengurangi margin atas dari 20px ke 10px */
+            flex-shrink: 0; 
+            order: 3; 
+        }
+
+        .photo-container.visible {
+            opacity: 1;
+        }
+
+        .photo-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Gaya Penutup (Paragraf Akhir) */
+        .modal .closing-text {
+            font-size: 1em; 
+            color: #000000; 
+            font-weight: bold; 
+            margin-top: 8px; /* PERUBAHAN: Mengurangi margin atas dari 15px ke 8px (lebih rapat) */
+            flex-shrink: 0; 
+            order: 4; 
+            line-height: 1.4; /* Sedikit mengurangi line-height */
+        }
+
+        /* Gaya untuk teks "from bububb" */
+        .modal .from-text {
+            font-size: 0.9em; 
+            color: #555555; 
+            margin-top: 3px; /* PERUBAHAN: Mengurangi margin atas dari 5px ke 3px (lebih rapat) */
+            flex-shrink: 0;
+            order: 5; 
+        }
+
+
+        .close-button {
+            position: absolute; top: 15px; right: 25px; font-size: 2.5em;
+            color: #ccc; cursor: pointer; transition: color 0.3s ease;
+        }
+
+        .close-button:hover { color: #d81b60; }
+        
+        /* Responsif */
+        @media (max-width: 500px) {
+            .center-container { padding-top: 5vh; }
+            /* PERUBAHAN: Padding bawah di mobile juga dirapatkan */
+            .modal { padding: 20px 20px 10px 20px; } 
+            .animated-text { min-height: 80px; } 
+        }
+
+    </style>
+</head>
+<body>
+    
+    <audio id="surpriseMusic" loop>
+        <source src="mp3/sempurna.mp3" type="audio/mp3">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+
+    <div class="center-container">
+        <h1>Ketuk Kadonya, Sayang!</h1>
+
+        <div class="gift-box" id="giftBox">
+            <div class="gift-lid"></div>
+            <div class="gift-bow"></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="messageModal">
+        <div class="modal">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            
+            <h2>Untuk Chelseaa, Cintakuu</h2>
+            
+            <div class="animated-text" id="animatedText">
+                </div>
+            
+            <div class="photo-container" id="photoContainer">
+                <img src="img/withbubub.jpg" alt="Foto Terbaik Kita Berdua">
+            </div>
+            
+            <p class="closing-text">
+                Lagu ini aku pilih karena menjadi lagu yang pertama kali kamu sematkan kepadakuu, dan kini aku menyematkan lagu ini untuk menggambarkan betapa sempurnanya dirimuu
+            </p>
+            <p class="from-text">From bububb</p> 
+        </div>
+    </div>
+
+    <script>
+        const giftBox = document.getElementById('giftBox');
+        const messageModal = document.getElementById('messageModal');
+        const animatedTextDiv = document.getElementById('animatedText');
+        const photoContainer = document.getElementById('photoContainer');
+        const surpriseMusic = document.getElementById('surpriseMusic'); 
+
+        // PESAN PRIBADI ANDA: Tidak diubah
+        const messageLines = [
+            "Dibilang sayangg? aku sayangg bangettt sayangg poll sama kamuu.aku suka semua tentang kamu aku suka kalo kamu marahin akuu‚ aku juga suka bgtt kalo dapett notif dari kamu, notif kamu adalah hal yg paling indah aku tunggu. pokoknya aku suka semuanya tentang kamuu, kamu ga perlu takut aku menghilang dari kamu, karna aku ga bakal ninggalin kamu di keadaan apapun.",
+            "Kamu adalah orang yg selalu aku pikirkan sebelum tidurr sampe bangun tidur,hmm ga ngerti lagi gimana cara bilangnya, gini lah aku, seorang diri yg memiliki segala kekurangan namun nekat mencintaimu, aku gabilang kalo aku yg terbaik, cuman aku bakal berusaha untuk jadii yg terbaik buat kamu.",
+            "Kamu butuh tempat cerita? sini cerita ke aku kalo kamu lebih milih memendem semuanya justru aku ngerasa gagal ada aku, kalo kamu ga cerita ke aku kamu mau cerita ke siapa? aku bakal nemenin kamu walaupun kamu lagi diposisi terendah dalam hidup kamu aku ga peduli walaupun diri aku sebenarnya juga lagi knpa-knpa. Aku tak sabar untuk menciptakan lebih banyak kenangan indah bersamamu di masa depan.",
+            "Yang jelas aku mau nemenin kamu disaat kamu lagi gabaik baik aja aku sayang sama kamu, aku cinta sama kamu aku nyaman sama kamu,maaf kalo aku sering marah sama kamu, maaf aku suka ngerepotin kamu, maaf kalo aku sering overthinking.",
+            "Kalo ada masalah selesaiin masalah nya sayangg jangan hubungan nya.apapun masalahnya kita selesaiin baik-baik u never know how much love u and i really lucky for having you. ❤️", 
+        ];
+
+        let lineIndex = 0;
+        let isTyping = false;
+        let musicPlayed = false;
+
+        function stopMusic() {
+            surpriseMusic.pause();
+            surpriseMusic.currentTime = 0; 
+            musicPlayed = false;
+        }
+
+        function playMusic() {
+            if (!musicPlayed) {
+                surpriseMusic.play().then(() => {
+                    musicPlayed = true;
+                }).catch(error => {
+                    console.log("Autoplay diblokir.");
+                });
+            }
+        }
+
+        function typeMessage() {
+            if (isTyping) return;
+
+            if (lineIndex >= messageLines.length) {
+                setTimeout(() => {
+                    photoContainer.classList.add('visible');
+                }, 500); 
+                return;
+            }
+
+            isTyping = true;
+            const lineText = messageLines[lineIndex];
+            
+            const newLine = document.createElement('p');
+            newLine.innerHTML = `<span class="message-line"></span>`;
+            animatedTextDiv.appendChild(newLine);
+            
+            animatedTextDiv.scrollTop = animatedTextDiv.scrollHeight;
+
+            const span = newLine.querySelector('.message-line');
+            let charIndex = 0;
+            
+            const typing = setInterval(() => {
+                if (charIndex < lineText.length) {
+                    span.textContent += lineText.charAt(charIndex);
+                    charIndex++;
+                } else {
+                    clearInterval(typing);
+                    isTyping = false;
+                    lineIndex++;
+                    setTimeout(typeMessage, 1200); // Jeda antar baris: 1.2 detik (cocok untuk lagu lambat)
+                }
+            }, 100); // Kecepatan ketik: 100ms per karakter (lebih lambat)
+        }
+
+        giftBox.addEventListener('click', () => {
+            if (messageModal.classList.contains('active')) return; 
+            
+            giftBox.classList.add('opened');
+            playMusic(); 
+            
+            setTimeout(() => {
+                messageModal.classList.add('active');
+                photoContainer.classList.remove('visible'); 
+                typeMessage();
+            }, 500); 
+        });
+
+        function closeModal() {
+            messageModal.classList.remove('active');
+            stopMusic(); 
+            
+            setTimeout(() => {
+                giftBox.classList.remove('opened');
+                animatedTextDiv.innerHTML = ''; 
+                photoContainer.classList.remove('visible'); 
+                lineIndex = 0; 
+                isTyping = false;
+            }, 500); 
+        }
+
+        messageModal.addEventListener('click', (event) => {
+            if (event.target === messageModal) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
